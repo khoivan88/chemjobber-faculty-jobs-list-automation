@@ -12,7 +12,7 @@ on:
 #     branches: [ main ]
 
 jobs:
-  check-link:
+  update-job-list:
     runs-on: ubuntu-latest
 
     steps:
