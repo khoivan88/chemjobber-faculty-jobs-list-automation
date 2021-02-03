@@ -1,0 +1,14 @@
+venv*
+
+*credentials.json
+cj-automation*.json
+token.pickle
+
+__pycache__
+.vscode
+
+.scrapy
+scrapy_spider
+spider_example.py
+
+read_google_sheet.py

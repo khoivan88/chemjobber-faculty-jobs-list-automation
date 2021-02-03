@@ -1,0 +1,6 @@
+google_api_python_client==1.12.8
+google_auth_oauthlib==0.4.2
+gspread==3.6.0
+itemadapter==0.2.0
+protobuf==3.14.0
+scrapy==2.4.1
