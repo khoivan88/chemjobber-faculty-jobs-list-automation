@@ -166,7 +166,7 @@ if __name__ == '__main__':
                 'store_empty': False,
             },
         },
-        'LOG_LEVEL': 'WARNING',
+        'LOG_LEVEL': 'INFO',
         # 'ROBOTSTXT_OBEY': False,
     }
 
