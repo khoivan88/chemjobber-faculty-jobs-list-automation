@@ -160,7 +160,7 @@ if __name__ == '__main__':
                 'store_empty': False,
             },
         },
-        'LOG_LEVEL': 'WARNING',
+        'LOG_LEVEL': 'INFO',
     })
 
     process = CrawlerProcess(settings=settings)
