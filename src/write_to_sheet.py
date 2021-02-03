@@ -69,7 +69,7 @@ def write_csv_to_google_sheet(file):
     # Automatically autofit the column width: https://stackoverflow.com/a/57334495/6596203
     spreadsheet = gc.open_by_key(SAMPLE_SPREADSHEET_ID)
     sheetId = spreadsheet.get_worksheet(0).id
-    print(f'{sheetId=}')
+    # print(f'{sheetId=}')
     spreadsheet.batch_update({
         "requests": [
         {
