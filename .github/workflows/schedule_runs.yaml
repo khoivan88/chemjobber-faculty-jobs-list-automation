@@ -50,7 +50,10 @@ jobs:
         echo ${{ github.ref }}
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
-        git commit -m "ci: Automated Jobs List update $(date)" ./src/jobs.csv | exit 0
+        git add -A
+        timestamp=$(date -u)
+        git commit -m "Latest data: ${timestamp}" || exit 0
+        # git commit -m "ci: Automated Jobs List update $(date)" ./src/jobs.csv | exit 0
     - name: Push changes
 #       if: github.ref == 'refs/heads/main'
       uses: ad-m/github-push-action@v0.6.0
