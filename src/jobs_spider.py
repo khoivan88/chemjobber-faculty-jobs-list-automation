@@ -140,8 +140,8 @@ class JobsHigheredjobsSpider(scrapy.Spider):
 
 if __name__ == '__main__':
     settings = {
-        # 'USER_AGENT': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36',
-        'USER_AGENT': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.87 Safari/537.36',
+        'USER_AGENT': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36',
+        # 'USER_AGENT': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.87 Safari/537.36',
         # 'BOT_NAME': 'Jobs-list-check',
         # 'HTTPCACHE_ENABLED': True,
         # 'DEFAULT_REQUEST_HEADERS': {
@@ -166,7 +166,7 @@ if __name__ == '__main__':
                 'store_empty': False,
             },
         },
-        'LOG_LEVEL': 'DEBUG',
+        'LOG_LEVEL': 'WARNING',
         # 'ROBOTSTXT_OBEY': False,
     }
 
