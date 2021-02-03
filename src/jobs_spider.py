@@ -95,6 +95,7 @@ class JobsHigheredjobsSpider(scrapy.Spider):
     base_url = 'https://www.higheredjobs.com/faculty/'
 
     def parse(self, response):
+        print(f'{response.body=}')
         jobs = response.css('.row.record')
         for job in jobs:
             title = job.xpath('.//a/text()').get().strip()
@@ -138,7 +139,12 @@ class JobsHigheredjobsSpider(scrapy.Spider):
 if __name__ == '__main__':
     settings = {
         'USER_AGENT': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36',
-        'HTTPCACHE_ENABLED': True,
+        # 'HTTPCACHE_ENABLED': True,
+        # DEFAULT_REQUEST_HEADERS = {
+        #   'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        #   'Accept-Language': 'en'
+        # }
+
         'ITEM_PIPELINES': {
             '__main__.RemovePostdocPipeline': 100,
             '__main__.DeDuplicatesPipeline': 800,
