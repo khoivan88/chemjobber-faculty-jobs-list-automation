@@ -95,7 +95,9 @@ class JobsHigheredjobsSpider(scrapy.Spider):
     base_url = 'https://www.higheredjobs.com/faculty/'
 
     def parse(self, response):
-        print(f'{response.body=}')
+        # print(f'{response.body=}')
+        # print(f'{response.meta=}')
+        # print(f'{response.headers=}')
         jobs = response.css('.row.record')
         for job in jobs:
             title = job.xpath('.//a/text()').get().strip()
@@ -138,21 +140,19 @@ class JobsHigheredjobsSpider(scrapy.Spider):
 
 if __name__ == '__main__':
     settings = {
-        'USER_AGENT': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36',
+        # 'USER_AGENT': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36',
+        'USER_AGENT': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.87 Safari/537.36',
+        # 'BOT_NAME': 'Jobs-list-check',
         # 'HTTPCACHE_ENABLED': True,
-        # DEFAULT_REQUEST_HEADERS = {
+        # 'DEFAULT_REQUEST_HEADERS': {
         #   'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         #   'Accept-Language': 'en'
-        # }
-
+        # },
         'ITEM_PIPELINES': {
             '__main__.RemovePostdocPipeline': 100,
             '__main__.DeDuplicatesPipeline': 800,
             # '__main__.CsvWriteOldestToLatest': 900,
             },
-    }
-
-    settings.update({
         'FEEDS': {
             Path(RESULT_FILE): {
                 'format': 'csv',
@@ -167,7 +167,8 @@ if __name__ == '__main__':
             },
         },
         'LOG_LEVEL': 'DEBUG',
-    })
+        # 'ROBOTSTXT_OBEY': False,
+    }
 
     process = CrawlerProcess(settings=settings)
     process.crawl(JobsHigheredjobsSpider)

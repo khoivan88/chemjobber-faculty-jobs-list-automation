@@ -8,12 +8,13 @@ on:
     - cron: '0 * * * *'
   # Allow manual trigger of this workflow
   workflow_dispatch:
-#   push:
-#     branches: [ main ]
+  push:
+    branches: [ main ]
 
 jobs:
   update-job-list:
-    runs-on: ubuntu-latest
+    # runs-on: macos-10.15
+    runs-on: ubuntu-20.04
 
     steps:
     - uses: actions/checkout@v2
