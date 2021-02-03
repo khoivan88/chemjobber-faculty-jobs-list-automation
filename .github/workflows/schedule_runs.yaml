@@ -45,15 +45,15 @@ jobs:
     - name: Update Jobs List
       run: |
         python ./src/jobs_spider.py
-#     - name: Commit reports if exist
-#       run: |
-#         echo ${{ github.ref }}
-#         git config --local user.email "action@github.com"
-#         git config --local user.name "GitHub Action"
-#         git commit -m "ci: Automated link check $(date)" -a | exit 0
-#     - name: Push changes
-# #       if: github.ref == 'refs/heads/main'
-#       uses: ad-m/github-push-action@v0.6.0
-#       with:
-#         github_token: ${{ secrets.GITHUB_TOKEN }}
-#         branch: ${{ github.ref }}
+    - name: Commit reports if exist
+      run: |
+        echo ${{ github.ref }}
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git commit -m "ci: Automated Jobs List update $(date)" ./src/jobs.csv | exit 0
+    - name: Push changes
+#       if: github.ref == 'refs/heads/main'
+      uses: ad-m/github-push-action@v0.6.0
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: ${{ github.ref }}
