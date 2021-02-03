@@ -5,7 +5,7 @@ name: Update Chemjobber Faculty Jobs List
 
 on:
   schedule:
-    - cron: '*/10 * * * *'
+    - cron: '0 * * * *'
   # Allow manual trigger of this workflow
   workflow_dispatch:
 #   push:
