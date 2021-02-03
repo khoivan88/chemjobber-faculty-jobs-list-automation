@@ -1,0 +1,59 @@
+# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: Update Chemjobber Faculty Jobs List
+
+on:
+  schedule:
+    - cron: '0/5 * * * *'
+  # Allow manual trigger of this workflow
+  workflow_dispatch:
+#   push:
+#     branches: [ main ]
+
+jobs:
+  check-link:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.9
+    - name: Cache pip
+      uses: actions/cache@v2
+      with:
+        # This path is specific to Ubuntu
+        path: ~/.cache/pip
+        # Look to see if there is a cache hit for the corresponding requirements file
+        key: ${{ runner.os }}-pip-${{ hashFiles('./src/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+          ${{ runner.os }}-:
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        # pip install flake8 pytest
+        pip install -r ./src/requirements.txt
+    - name: Get 'Service Account' credentials
+      shell: bash
+      env:
+        SERVICE_ACCOUNT_CREDENTIAL: ${{ secrets.SERVICE_ACCOUNT_CREDENTIAL }}
+      run: |
+        echo "$SERVICE_ACCOUNT_CREDENTIAL" > cj-automation-1612312988569-c1624d5bb720.json
+    - name: Update Jobs List
+      run: |
+        python ./src/jobs_spider.py
+#     - name: Commit reports if exist
+#       run: |
+#         echo ${{ github.ref }}
+#         git config --local user.email "action@github.com"
+#         git config --local user.name "GitHub Action"
+#         git commit -m "ci: Automated link check $(date)" -a | exit 0
+#     - name: Push changes
+# #       if: github.ref == 'refs/heads/main'
+#       uses: ad-m/github-push-action@v0.6.0
+#       with:
+#         github_token: ${{ secrets.GITHUB_TOKEN }}
+#         branch: ${{ github.ref }}
