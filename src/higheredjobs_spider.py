@@ -101,19 +101,20 @@ class JobsHigheredjobsSpider(scrapy.Spider):
         jobs = response.css('.row.record')
         for job in jobs:
             title = job.xpath('.//a/text()').get().strip()
-            # link = self.base_url + job.xpath('.//a/@href').get()
-            link = response.urljoin(job.xpath('.//a/@href').get())
+            details_url = response.urljoin(job.xpath('.//a/@href').get())
 
-            ads_job_code = re.findall(r'(?<=JobCode=).*(?=&)', link)[0]
+            ads_job_code = re.findall(r'(?<=JobCode=).*(?=&)', details_url)[0]
             all_text = job.xpath('.//text()').extract()
 
             # Remove all whitespace
             [_, school, location, department, posted_date ] = [word.strip() for word in all_text if re.search(r'\S',word)]
             posted_date = datetime.strptime(re.findall(r'\d{2}/\d{2}/\d{2}', posted_date)[0], '%m/%d/%y')
-            school = f'=hyperlink("{link}","{school}")'
+
+            # school = f'=hyperlink("{details_url}","{school}")'
             city, _, state = location.partition(',')
             city, state = map(str.strip, [city, state])
-            ads_source = f'=hyperlink("{self.start_urls[0]}","HigherEdJobs")'
+            # ads_source = f'=hyperlink("{self.start_urls[0]}","HigherEdJobs")'
+            ads_source = f'=hyperlink("{details_url}","HigherEdJobs")'
 
             # Get the ranking
             rank = re.findall(r'assist|assoc', title, re.IGNORECASE)
@@ -124,7 +125,8 @@ class JobsHigheredjobsSpider(scrapy.Spider):
             specialization = re.findall(r'org\w*|anal\w*|inorg\w*|bio\w*|physic\w*|polymer\w*', title, re.IGNORECASE)
             specialization = ', '.join(specialization)
 
-            item = HigheredjobsItem({
+            # item = HigheredjobsItem()
+            cb_kwargs = {
                 'posted_date': posted_date.strftime('%m/%d/%Y'),
                 'school': school,
                 'department': department,
@@ -135,8 +137,22 @@ class JobsHigheredjobsSpider(scrapy.Spider):
                 'ads_job_code': ads_job_code,
                 'rank': rank,
                 'specialization': specialization,
-            })
-            yield item
+            }
+            # yield item
+
+            yield scrapy.Request(url=details_url, cb_kwargs=cb_kwargs, callback=self.parse_ads)
+
+    def parse_ads(self, response, **cb_kwargs):
+        online_application_title_field = response.xpath(
+            './/*[@id="jobApplyInfo"]//*[contains(@class, "field-label")][contains(normalize-space(text()), "Online App. Form")]'
+        )
+        online_application_url = online_application_title_field.xpath('./following-sibling::div[1]/a/@data-orig-href').get()
+
+        # Update the school field to embed the link to the online app (following Chemjobber List format)
+        school = cb_kwargs['school']
+        cb_kwargs['school'] = f'=hyperlink("{online_application_url}","{school}")'
+        # print(f'{cb_kwargs=}')
+        yield HigheredjobsItem(cb_kwargs)
 
 
 if __name__ == '__main__':
