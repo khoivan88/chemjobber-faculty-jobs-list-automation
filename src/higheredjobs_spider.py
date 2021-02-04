@@ -140,6 +140,7 @@ class JobsHigheredjobsSpider(scrapy.Spider):
             }
             # yield item
 
+            # Pass the callback function arguments with 'cb_kwargs': https://docs.scrapy.org/en/latest/topics/request-response.html?highlight=cb_kwargs#scrapy.http.Request.cb_kwargs
             yield scrapy.Request(url=details_url, cb_kwargs=cb_kwargs, callback=self.parse_ads)
 
     def parse_ads(self, response, **cb_kwargs):
@@ -148,9 +149,9 @@ class JobsHigheredjobsSpider(scrapy.Spider):
         )
         online_application_url = online_application_title_field.xpath('./following-sibling::div[1]/a/@data-orig-href').get()
 
-        # Update the school field to embed the link to the online app (following Chemjobber List format)
-        school = cb_kwargs['school']
-        cb_kwargs['school'] = f'=hyperlink("{online_application_url}","{school}")'
+        # Update the school field to embed the link to the online app if exists (following Chemjobber List format)
+        application_url = online_application_url or response.url
+        cb_kwargs['school'] = f'=hyperlink("{application_url}","{cb_kwargs["school"]}")'
         # print(f'{cb_kwargs=}')
         yield HigheredjobsItem(cb_kwargs)
 
