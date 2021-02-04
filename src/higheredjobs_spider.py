@@ -174,5 +174,3 @@ if __name__ == '__main__':
     process.crawl(JobsHigheredjobsSpider)
     process.start()
 
-    from write_to_sheet import write_csv_to_google_sheet
-    write_csv_to_google_sheet(RESULT_FILE)
