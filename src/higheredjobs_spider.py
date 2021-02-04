@@ -24,7 +24,7 @@ FIELDS_TO_EXPORT = ['posted_date', 'priority_date', 'category',
             'ads_title', 'ads_source', 'ads_job_code'
             ]
 
-class CsvWriteOldestToLatest(object):
+class CsvWriteLatestToOldest(object):
 
     def open_spider(self, spider):
         self.list_items = []
@@ -36,7 +36,7 @@ class CsvWriteOldestToLatest(object):
         self.exporter.start_exporting()
 
     def close_spider(self, spider):
-        ordered_list = sorted(self.list_items, key=lambda i: i['posted_date'])
+        ordered_list = sorted(self.list_items, key=lambda i: i['posted_date'], reverse=True)
 
         for i in ordered_list:
             item = {key: i.get(key) or '' for key in FIELDS_TO_EXPORT}
@@ -152,22 +152,22 @@ if __name__ == '__main__':
         'ITEM_PIPELINES': {
             '__main__.RemovePostdocPipeline': 100,
             '__main__.DeDuplicatesPipeline': 800,
-            # '__main__.CsvWriteOldestToLatest': 900,
+            '__main__.CsvWriteLatestToOldest': 900,
             },
-        'FEEDS': {
-            Path(RESULT_FILE): {
-                'format': 'csv',
-                'fields': ['posted_date', 'priority_date', 'category',
-                           'school', 'department', 'specialization',
-                           'rank', 'city', 'state', 'canada',
-                           'current_status', 'comments1', 'comments2',
-                           'ads_title', 'ads_source', 'ads_job_code'
-                           ],
-                'overwrite': True,
-                'store_empty': False,
-            },
-        },
-        'LOG_LEVEL': 'INFO',
+        # 'FEEDS': {
+        #     Path(RESULT_FILE): {
+        #         'format': 'csv',
+        #         'fields': ['posted_date', 'priority_date', 'category',
+        #                    'school', 'department', 'specialization',
+        #                    'rank', 'city', 'state', 'canada',
+        #                    'current_status', 'comments1', 'comments2',
+        #                    'ads_title', 'ads_source', 'ads_job_code'
+        #                    ],
+        #         'overwrite': True,
+        #         'store_empty': False,
+        #     },
+        # },
+        'LOG_LEVEL': 'DEBUG',
         # 'ROBOTSTXT_OBEY': False,
     }
 
