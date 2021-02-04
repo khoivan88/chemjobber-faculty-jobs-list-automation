@@ -101,7 +101,8 @@ class JobsHigheredjobsSpider(scrapy.Spider):
         jobs = response.css('.row.record')
         for job in jobs:
             title = job.xpath('.//a/text()').get().strip()
-            link = self.base_url + job.xpath('.//a/@href').get()
+            # link = self.base_url + job.xpath('.//a/@href').get()
+            link = response.urljoin(job.xpath('.//a/@href').get())
 
             ads_job_code = re.findall(r'(?<=JobCode=).*(?=&)', link)[0]
             all_text = job.xpath('.//text()').extract()
