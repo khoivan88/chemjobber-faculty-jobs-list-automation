@@ -15,7 +15,7 @@ CURRENT_FILEPATH = Path(__file__).resolve().parent
 
 RESULT_FILE = CURRENT_FILEPATH / 'jobs.csv'
 
-JOB_TITLE_IGNORE_KEYWORDS = ['post-doc', 'postdoc', 'scientist']
+JOB_TITLE_IGNORE_KEYWORDS = ['post-doc', 'postdoc', 'post doc', 'scientist']
 
 FIELDS_TO_EXPORT = ['posted_date', 'priority_date', 'category',
             'school', 'department', 'specialization',
