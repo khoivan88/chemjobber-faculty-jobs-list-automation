@@ -61,7 +61,7 @@ jobs:
         echo "$SERVICE_ACCOUNT_CREDENTIAL" > cj-automation-1612312988569-c1624d5bb720.json
     - name: Update Jobs List
       run: |
-        python ./src/jobs_spider.py
+        python ./src/list_jobs.py
     - name: Commit reports if exist
       run: |
         echo ${{ github.ref }}
