@@ -61,7 +61,8 @@ def write_csv_to_google_sheet(file):
     gc = gspread.service_account(filename=CREDENTIALS)
 
     # Read CSV file contents
-    content = open(CURRENT_FILEPATH / file, 'r').read()
+    with open(file, 'rb') as f_in:
+        content = f_in.read()
 
     # Import the CSV file into the google sheet
     gc.import_csv(SAMPLE_SPREADSHEET_ID, content)
