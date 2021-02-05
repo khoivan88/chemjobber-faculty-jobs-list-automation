@@ -88,4 +88,4 @@ def write_csv_to_google_sheet(file):
 
 
 if __name__ == '__main__':
-    write_csv_to_google_sheet('jobs.csv')
+    write_csv_to_google_sheet(CURRENT_FILEPATH / 'jobs.csv')
