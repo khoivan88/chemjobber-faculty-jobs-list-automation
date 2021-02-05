@@ -107,8 +107,10 @@ class JobsHigheredjobsSpider(scrapy.Spider):
             all_text = job.xpath('.//text()').extract()
 
             # Remove all whitespace
-            [_, school, location, department, posted_date ] = [word.strip() for word in all_text if re.search(r'\S',word)]
-            posted_date = datetime.strptime(re.findall(r'\d{2}/\d{2}/\d{2}', posted_date)[0], '%m/%d/%y')
+            # print(f'{all_text=}')
+            # print([word.strip() for word in all_text if re.search(r'\S', word)])
+            [_, school, location, department, *posted_date] = [word.strip() for word in all_text if re.search(r'\S', word)]
+            posted_date = datetime.strptime(re.findall(r'\d{2}/\d{2}/\d{2}', posted_date[0])[0], '%m/%d/%y')
 
             # school = f'=hyperlink("{details_url}","{school}")'
             city, _, state = location.partition(',')
