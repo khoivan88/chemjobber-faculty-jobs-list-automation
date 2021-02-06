@@ -3,6 +3,7 @@ import scrapy
 from scrapy.crawler import CrawlerProcess
 
 from higheredjobs_spider import JobsHigheredjobsSpider
+from cenews_spider import ChemicalEngineeringNewsSpider
 from write_to_sheet import write_csv_to_google_sheet
 
 
@@ -53,6 +54,7 @@ if __name__ == '__main__':
 
     process = CrawlerProcess(settings=settings)
     process.crawl(JobsHigheredjobsSpider)
+    process.crawl(ChemicalEngineeringNewsSpider)
     process.start()
 
     write_csv_to_google_sheet(RESULT_FILE)
