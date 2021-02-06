@@ -35,9 +35,12 @@ if __name__ == '__main__':
         # },
         'CSV_EXPORT_FILE': RESULT_FILE,
         'ITEM_PIPELINES': {
-            'higheredjobs_spider.RemovePostdocPipeline': 100,
-            'higheredjobs_spider.DeDuplicatesPipeline': 800,
-            'higheredjobs_spider.CsvWriteLatestToOldest': 900,
+            # 'higheredjobs_spider.RemovePostdocPipeline': 1,
+            # 'higheredjobs_spider.DeDuplicatesPipeline': 2,
+            # 'higheredjobs_spider.CsvWriteLatestToOldest': 3,
+            'cenews_spider.RemovePostdocPipeline': 4,
+            'cenews_spider.DeDuplicatesPipeline': 5,
+            'cenews_spider.CsvWriteLatestToOldest': 6,
             },
         # 'FEEDS': {
         #     Path(RESULT_FILE): {
