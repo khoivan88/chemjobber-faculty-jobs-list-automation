@@ -13,7 +13,7 @@ from scrapy.exporters import CsvItemExporter
 
 CURRENT_FILEPATH = Path(__file__).resolve().parent
 
-RESULT_FILE = CURRENT_FILEPATH / 'jobs.csv'
+THIS_SPIDER_RESULT_FILE = CURRENT_FILEPATH / 'higheredjobs_jobs.csv'
 
 JOB_TITLE_IGNORE_KEYWORDS = ['post-doc', 'postdoc', 'post doc', 'scientist']
 
@@ -26,9 +26,18 @@ FIELDS_TO_EXPORT = ['posted_date', 'priority_date', 'category',
 
 class CsvWriteLatestToOldest(object):
 
+    def __init__(self, csv_export_file):
+        self.csv_export_file = csv_export_file
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        return cls(
+            csv_export_file=crawler.settings.get('CSV_EXPORT_FILE', THIS_SPIDER_RESULT_FILE),
+        )
+
     def open_spider(self, spider):
         self.list_items = []
-        self.file = open(Path(RESULT_FILE), 'wb')
+        self.file = open(self.csv_export_file, 'ab')
 
         # Creating a FanItemExporter object and initiating export
         self.exporter = CsvItemExporter(self.file, fields_to_export=FIELDS_TO_EXPORT)
@@ -171,6 +180,9 @@ class JobsHigheredjobsSpider(scrapy.Spider):
 
 
 if __name__ == '__main__':
+    # Remove the result file if exists
+    THIS_SPIDER_RESULT_FILE.unlink(missing_ok=True)
+
     settings = {
         'USER_AGENT': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36',
         # 'USER_AGENT': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.87 Safari/537.36',
@@ -180,11 +192,12 @@ if __name__ == '__main__':
         #   'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         #   'Accept-Language': 'en'
         # },
+        'CSV_EXPORT_FILE': THIS_SPIDER_RESULT_FILE,
         'ITEM_PIPELINES': {
             '__main__.RemovePostdocPipeline': 100,
             '__main__.DeDuplicatesPipeline': 800,
             '__main__.CsvWriteLatestToOldest': 900,
-            },
+        },
         # 'FEEDS': {
         #     Path(RESULT_FILE): {
         #         'format': 'csv',
