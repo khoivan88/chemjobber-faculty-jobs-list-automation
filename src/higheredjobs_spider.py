@@ -99,6 +99,7 @@ class JobsHigheredjobsSpider(scrapy.Spider):
         # print(f'{response.meta=}')
         # print(f'{response.headers=}')
         jobs = response.css('.row.record')
+        posted_in_the_past_five_days = True
         for job in jobs:
             title = job.xpath('.//a/text()').get().strip()
             details_url = response.urljoin(job.xpath('.//a/@href').get())
@@ -111,6 +112,7 @@ class JobsHigheredjobsSpider(scrapy.Spider):
             # print([word.strip() for word in all_text if re.search(r'\S', word)])
             [_, school, location, department, *posted_date] = [word.strip() for word in all_text if re.search(r'\S', word)]
             posted_date = datetime.strptime(re.findall(r'\d{2}/\d{2}/\d{2}', posted_date[0])[0], '%m/%d/%y')
+            posted_in_the_past_five_days = ((datetime.now() - posted_date).days <= 5)
 
             # school = f'=hyperlink("{details_url}","{school}")'
             city, _, state = location.partition(',')
@@ -143,7 +145,17 @@ class JobsHigheredjobsSpider(scrapy.Spider):
             # yield item
 
             # Pass the callback function arguments with 'cb_kwargs': https://docs.scrapy.org/en/latest/topics/request-response.html?highlight=cb_kwargs#scrapy.http.Request.cb_kwargs
-            yield scrapy.Request(url=details_url, cb_kwargs=cb_kwargs, callback=self.parse_ads)
+            if posted_in_the_past_five_days:
+                yield scrapy.Request(url=details_url, cb_kwargs=cb_kwargs, callback=self.parse_ads)
+
+        # Find next page url if exists:
+        next_page_partial_url = response.xpath('.//a[.//img[not(contains(@class, "disabled")) and contains(@src, "right.gif")]]/@href').get()
+        # print(f'{next_page_partial_url=}')
+
+        if next_page_partial_url and posted_in_the_past_five_days:
+            next_page_url = response.urljoin(next_page_partial_url)
+            # print(f'{next_page_url=}')
+            yield scrapy.Request(url=next_page_url, callback=self.parse)
 
     def parse_ads(self, response, **cb_kwargs):
         online_application_title_field = response.xpath(
