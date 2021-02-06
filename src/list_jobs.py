@@ -21,6 +21,9 @@ FIELDS_TO_EXPORT = ['posted_date', 'priority_date', 'category',
 
 
 if __name__ == '__main__':
+    # Remove the result file if exists
+    RESULT_FILE.unlink(missing_ok=True)
+
     settings = {
         'USER_AGENT': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36',
         # 'USER_AGENT': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.87 Safari/537.36',
@@ -30,6 +33,7 @@ if __name__ == '__main__':
         #   'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         #   'Accept-Language': 'en'
         # },
+        'CSV_EXPORT_FILE': RESULT_FILE,
         'ITEM_PIPELINES': {
             'higheredjobs_spider.RemovePostdocPipeline': 100,
             'higheredjobs_spider.DeDuplicatesPipeline': 800,
