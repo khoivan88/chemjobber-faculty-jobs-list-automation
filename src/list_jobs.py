@@ -12,11 +12,11 @@ RESULT_FILE = CURRENT_FILEPATH / 'jobs.csv'
 
 JOB_TITLE_IGNORE_KEYWORDS = ['post-doc', 'postdoc', 'scientist']
 
-FIELDS_TO_EXPORT = ['posted_date', 'priority_date', 'category',
+FIELDS_TO_EXPORT = ['ads_title', 'posted_date', 'priority_date', 'category',
                     'school', 'department', 'specialization',
                     'rank', 'city', 'state', 'canada',
                     'current_status', 'comments1', 'comments2',
-                    'ads_title', 'ads_source', 'ads_job_code'
+                    'ads_source', 'ads_job_code'
                     ]
 
 
