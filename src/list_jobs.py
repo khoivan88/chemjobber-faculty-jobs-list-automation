@@ -2,12 +2,12 @@ import csv
 from pathlib import Path, PurePath
 from typing import Sequence
 
-import scrapy
 from scrapy.crawler import CrawlerProcess
 
 from cenews_spider import ChemicalEngineeringNewsSpider
 from higheredjobs_spider import JobsHigheredjobsSpider
 from write_to_sheet import write_csv_to_google_sheet
+
 
 CURRENT_FILEPATH = Path(__file__).resolve().parent
 RESULT_FILE = CURRENT_FILEPATH / 'jobs.csv'
@@ -63,10 +63,10 @@ if __name__ == '__main__':
         # },
         'CSV_EXPORT_FILE': RESULT_FILE,
         'ITEM_PIPELINES': {
-            # 'higheredjobs_spider.RemovePostdocPipeline': 1,
+            # 'higheredjobs_spider.RemoveIgnoredKeywordsPipeline': 1,
             # 'higheredjobs_spider.DeDuplicatesPipeline': 2,
             # 'higheredjobs_spider.CsvWriteLatestToOldest': 3,
-            'cenews_spider.RemovePostdocPipeline': 4,
+            'cenews_spider.RemoveIgnoredKeywordsPipeline': 4,
             'cenews_spider.DeDuplicatesPipeline': 5,
             # 'cenews_spider.CsvWriteLatestToOldest': 6,
             },
