@@ -6,6 +6,7 @@ from scrapy.crawler import CrawlerProcess
 
 from cenews_spider import ChemicalEngineeringNewsSpider
 from higheredjobs_spider import JobsHigheredjobsSpider
+from chroniclehighered_spider import ChronicalHigherEducationSpider
 from write_to_sheet import write_csv_to_google_sheet
 
 
@@ -90,6 +91,7 @@ if __name__ == '__main__':
     process = CrawlerProcess(settings=settings)
     process.crawl(JobsHigheredjobsSpider)
     process.crawl(ChemicalEngineeringNewsSpider)
+    process.crawl(ChronicalHigherEducationSpider)
     process.start()
 
     # Sort the resulting csv file
