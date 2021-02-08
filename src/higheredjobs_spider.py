@@ -14,8 +14,9 @@ from items import JobItem
 
 
 CURRENT_FILEPATH = Path(__file__).resolve().parent
-
-THIS_SPIDER_RESULT_FILE = CURRENT_FILEPATH / 'higheredjobs_jobs.csv'
+DATA_FOLDER = CURRENT_FILEPATH.parent / 'data'
+DATA_FOLDER.mkdir(exist_ok=True)
+THIS_SPIDER_RESULT_FILE = DATA_FOLDER / 'higheredjobs_jobs.csv'
 
 JOB_TITLE_IGNORE_KEYWORDS = ['post-doc', 'postdoc', 'post doc', 'scientist']
 

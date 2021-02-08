@@ -5,7 +5,7 @@ Automate some job listing for Chemjobber Faculty Jobs List. The list of jobs are
 - Jobs posted in the past five days
 - Jobs exclude 'postdoc' and 'scientist' positions
 - List of sources (job boards are listed in [Job boards](#job-boards) section.
-- The result file is [here](src/jobs.csv)
+- The result file is [here](data/jobs.csv)
 
 ## Job boards
 This repo automatically extract jobs from:

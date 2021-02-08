@@ -10,7 +10,9 @@ from write_to_sheet import write_csv_to_google_sheet
 
 
 CURRENT_FILEPATH = Path(__file__).resolve().parent
-RESULT_FILE = CURRENT_FILEPATH / 'jobs.csv'
+DATA_FOLDER = CURRENT_FILEPATH.parent / 'data'
+DATA_FOLDER.mkdir(exist_ok=True)
+RESULT_FILE = DATA_FOLDER / 'jobs.csv'
 
 JOB_TITLE_IGNORE_KEYWORDS = ['post-doc', 'postdoc', 'scientist']
 
