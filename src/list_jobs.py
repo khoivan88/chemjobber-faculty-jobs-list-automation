@@ -1,14 +1,16 @@
 import csv
+import re
+from collections import Counter
 from pathlib import Path, PurePath
-from typing import Sequence
+from typing import Dict, List, Sequence
 
+from furl import furl
 from scrapy.crawler import CrawlerProcess
 
 from cenews_spider import ChemicalEngineeringNewsSpider
-from higheredjobs_spider import JobsHigheredjobsSpider
 from chroniclehighered_spider import ChronicalHigherEducationSpider
+from higheredjobs_spider import JobsHigheredjobsSpider
 from write_to_sheet import write_csv_to_google_sheet
-
 
 CURRENT_FILEPATH = Path(__file__).resolve().parent
 DATA_FOLDER = CURRENT_FILEPATH.parent / 'data'
@@ -25,8 +27,8 @@ FIELDS_TO_EXPORT = ['ads_title', 'posted_date', 'priority_date', 'category',
                     ]
 
 
-def sort_csv(file: PurePath, fieldnames: Sequence, sort_by: str, reverse: bool = False):
-    """Sort a csv file by the 'sort_by' column name
+def process_csv(file: PurePath, fieldnames: Sequence, sort_by: str, reverse: bool = False) -> None:
+    """ Remove duplicated row & Sort a csv file by the 'sort_by' column name
 
     Parameters
     ----------
@@ -41,14 +43,64 @@ def sort_csv(file: PurePath, fieldnames: Sequence, sort_by: str, reverse: bool =
     """
     with open(file, 'r') as f_in:
         dict_reader = csv.DictReader(f_in, fieldnames=fieldnames)
-        data = list(dict_reader)
+        data = list(dict_reader)[1:]
 
-    sorted_data = sorted(data, key=lambda i: i[sort_by], reverse=reverse)
+    deduplicated_data = remove_duplicate(data)
+    # print(f'{len(deduplicated_data)=}')
+
+    sorted_data = sorted(deduplicated_data, key=lambda i: i[sort_by], reverse=reverse)
 
     with open(file, 'w') as f_out:
         dict_writer = csv.DictWriter(f_out, fieldnames=fieldnames)
         dict_writer.writeheader()
         dict_writer.writerows(sorted_data)
+
+
+def remove_duplicate(data: List[Dict[str, str]]) -> List[Dict[str, str]]:
+    """Remove duplicated row based on 'ads_title' and then the application url
+
+    Duplicated is first considered based on the 'ads_title' then the url in the 'school' key.
+    url is first processed to remove query 'source' as well as scheme (e.g. 'http' or 'https')
+
+    Parameters
+    ----------
+    data : List[Dict[str, str]]
+        The list of csv rows without header, should be passed in with csv.DictReader
+
+    Returns
+    -------
+    List[Dict[str, str]]
+        Remove List with similar structure but duplicated removed
+    """
+    count_result = Counter(row['ads_title'] for row in data)
+    # print(f'{count_result=}')
+
+    # Get all rows with 'ads_title' count more than 1
+    duplicate_titles = [title for title, count in count_result.items() if count > 1]
+    # print(f'{duplicate_titles=}')
+
+    # Add all non-duplicated into the result list
+    result = [row for row in data if row['ads_title'] not in duplicate_titles]
+    # print(f'{len(result)=}')
+
+    for title in duplicate_titles:
+        duplicated_rows = [row for row in data if row['ads_title'] == title]
+        # print(f'{duplicated_rows=}')
+
+        existing_info = set()
+        for row in duplicated_rows:
+            url, school_name = re.findall(r'\"(.*?)\"', row['school'])
+            # Remove query 'source' since some url is like this:
+            # 'https://embryriddle.wd1.myworkdayjobs.com/en-US/External/job/Daytona-Beach-FL/Non-Tenure-Track-Faculty-Position-in-Chemistry--Daytona-Beach-Campus-_R300364?source=HigherEdJobs'
+            url = furl(url).remove(query=['source']).url
+            # Need to remove scheme ('http' or 'https'):
+            url = re.sub(r'https?://', '', url)
+            if (url, school_name) not in existing_info:
+                existing_info.add((url, school_name))
+                result.append(row)
+            # print(f'{existing_info=}')
+
+    return result
 
 
 if __name__ == '__main__':
@@ -95,8 +147,8 @@ if __name__ == '__main__':
     process.start()
 
     # Sort the resulting csv file
-    sort_csv(file=RESULT_FILE, fieldnames=FIELDS_TO_EXPORT,
-             sort_by='posted_date', reverse=True)
+    process_csv(file=RESULT_FILE, fieldnames=FIELDS_TO_EXPORT,
+                sort_by='posted_date', reverse=True)
 
     # Write csv file to google sheet
     write_csv_to_google_sheet(RESULT_FILE)

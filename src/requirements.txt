@@ -1,4 +1,4 @@
-wheel
+furl==2.1.0
 google_api_python_client==1.12.8
 google_auth_oauthlib==0.4.2
 gspread==3.6.0
