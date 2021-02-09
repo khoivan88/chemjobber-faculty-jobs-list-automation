@@ -113,6 +113,8 @@ class ChemicalEngineeringNewsSpider(scrapy.Spider):
             location = job.xpath('.//*[contains(@class, "lister__meta-item--location")]//text()').get()
             city, _, state = location.partition(',')
             city, state = map(str.strip, [city, state])
+            is_in_canada = bool(re.search(r'(CA)', state, re.IGNORECASE)) or None
+
             # print(f'{location=}')
             recruiter = job.xpath('.//*[contains(@class, "lister__meta-item--recruiter")]//text()').get()
             # print(f'{recruiter=}')
@@ -140,6 +142,7 @@ class ChemicalEngineeringNewsSpider(scrapy.Spider):
                 'ads_job_code': ads_job_code,
                 'rank': rank,
                 # 'specialization': specialization,
+                'canada': is_in_canada,
             }
             # yield JobItem(cb_kwargs)
 
