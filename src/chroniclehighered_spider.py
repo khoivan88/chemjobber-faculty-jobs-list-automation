@@ -25,6 +25,7 @@ FIELDS_TO_EXPORT = ['ads_title', 'posted_date', 'priority_date', 'category',
                     'ads_source', 'ads_job_code'
                     ]
 
+COUNTRIES_TO_SEARCH = ['United States', 'Canada', 'Puerto Rico']
 
 class CsvWriteLatestToOldest:
     """Write to CSV file in latest to oldest order of 'posted_date'"""
@@ -110,13 +111,22 @@ class ChronicalHigherEducationSpider(scrapy.Spider):
         for job in jobs:
             title = job.xpath('.//*[contains(@class, "lister__header")]//a//text()').get().strip()
             # print(f'{title=}')
-            location = job.xpath('.//*[contains(@class, "lister__meta-item--location")]//text()').get()
+            location = ''.join(job.xpath('.//*[contains(@class, "lister__meta-item--location")]//text()').getall()).strip()
             state = None
-            if location:
+            country = None
+            if ',' in location:
                 state, _, country = location.partition(',')
                 state, country = map(str.strip, [state, country])
             else:
-                country = location
+                country = location.strip()
+
+            # If not belong to the list of countries to search then move on to the next one:
+            # The ads listing show jobs in Korea as 'Korea, Republic of'
+            if country not in COUNTRIES_TO_SEARCH or state == 'Korea':
+                # print(f'{country=}')
+                # print(f'{state=}')
+                continue
+
             is_in_canada = bool(re.search(r'canada', country, re.IGNORECASE)) or None
             # print(f'{location=}')
             recruiter = job.xpath('.//*[contains(@class, "lister__meta-item--recruiter")]//text()').get()
