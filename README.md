@@ -12,3 +12,4 @@ This repo automatically extract jobs from:
 - [HigherEdJobs](https://www.higheredjobs.com/faculty/search.cfm?JobCat=101&StartRow=-1&SortBy=1&NumJobs=25&filterby=&filterptype=1&filtercountry=38&filtercountry=226&CatType=)
 - [Chemical & Engineering News Magazine Jobs page](https://chemistryjobs.acs.org/jobs/full-time/north-america/)
 - [The Chronical of Higher Education Jobs page](https://jobs.chronicle.com/jobs/chemistry-and-biochemistry/full-time/)
+- [Canada Chemistry Faculty Position Blog](http://chempostingscanada.blogspot.com/)
