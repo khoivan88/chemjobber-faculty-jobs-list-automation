@@ -86,9 +86,10 @@ class DeDuplicatesPipeline:
 
     def process_item(self, item, spider):
         adapter = ItemAdapter(item)
-        if adapter['ads_job_code'] in self.ids_seen:
-            raise DropItem(f"Duplicate item found: {item!r}")
-        self.ids_seen.add(adapter['ads_job_code'])
+        if adapter.get('ads_job_code'):
+            if adapter['ads_job_code'] in self.ids_seen:
+                raise DropItem(f"Duplicate item found: {item!r}")
+            self.ids_seen.add(adapter['ads_job_code'])
         return item
 
 
