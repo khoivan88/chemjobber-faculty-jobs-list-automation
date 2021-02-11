@@ -10,6 +10,7 @@ from scrapy.crawler import CrawlerProcess
 from cenews_spider import ChemicalEngineeringNewsSpider
 from chroniclehighered_spider import ChronicalHigherEducationSpider
 from higheredjobs_spider import JobsHigheredjobsSpider
+from chempostingcanada_spider import ChempostingcanadaSpider
 from write_to_sheet import write_csv_to_google_sheet
 
 CURRENT_FILEPATH = Path(__file__).resolve().parent
@@ -43,7 +44,7 @@ def process_csv(file: PurePath, fieldnames: Sequence, sort_by: str, reverse: boo
     """
     with open(file, 'r') as f_in:
         dict_reader = csv.DictReader(f_in, fieldnames=fieldnames)
-        data = list(dict_reader)[1:]
+        data = list(dict_reader)
 
     deduplicated_data = remove_duplicate(data)
     # print(f'{len(deduplicated_data)=}')
@@ -144,6 +145,7 @@ if __name__ == '__main__':
     process.crawl(JobsHigheredjobsSpider)
     process.crawl(ChemicalEngineeringNewsSpider)
     process.crawl(ChronicalHigherEducationSpider)
+    process.crawl(ChempostingcanadaSpider)
     process.start()
 
     # Sort the resulting csv file
