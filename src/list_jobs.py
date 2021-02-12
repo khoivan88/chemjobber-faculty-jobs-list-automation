@@ -93,7 +93,7 @@ def remove_duplicate(data: List[Dict[str, str]]) -> List[Dict[str, str]]:
             url, school_name = re.findall(r'\"(.*?)\"', row['school'])
             # Remove query 'source' since some url is like this:
             # 'https://embryriddle.wd1.myworkdayjobs.com/en-US/External/job/Daytona-Beach-FL/Non-Tenure-Track-Faculty-Position-in-Chemistry--Daytona-Beach-Campus-_R300364?source=HigherEdJobs'
-            url = furl(url).remove(query=['source']).url
+            url = furl(url).remove(query=['source']).url.rstrip('/')
             # Need to remove scheme ('http' or 'https'):
             url = re.sub(r'https?://', '', url)
             if (url, school_name) not in existing_info:
