@@ -173,9 +173,26 @@ class ChemicalEngineeringNewsSpider(scrapy.Spider):
         specialization_text_list = response.css('.job-detail-description__category-Fieldofspecialization > *:last-child *::text').getall()
         specialization = re.sub(r'\s{2,}', '', ''.join(specialization_text_list))
 
+        job_description = ' '.join(word.strip()
+                                   for word in (response.css('.job-description *::text').getall())
+                                   if re.search(r'\S', word))
+        # print(f'{job_description=}')
+
+        # Get the ranking (using the job description)
+        rank = re.findall(r'assistant\b|associate\b|full\s', job_description, re.IGNORECASE)
+        rank_text = '/'.join(word.lower().replace('assistant', 'asst').replace('associate', 'assoc')
+                             for word in rank)
+        # print(f'{rank_text=}')
+        cb_kwargs['rank'] = rank_text or cb_kwargs['rank']
+
+        tenure_type = re.search(r'\S*tenure\S*', job_description, re.IGNORECASE)
+        # print(f'{tenure_type=}')
+        comments1 = tenure_type[0] if tenure_type else None
+
         cb_kwargs.update({'posted_date': posted_date_string,
                           'priority_date': priority_date,
-                          'specialization': specialization})
+                          'specialization': specialization,
+                          'comments1': comments1})
         # yield JobItem(cb_kwargs)
 
         is_posted_in_the_past_five_days = (datetime.now() - posted_date).days <= 5
