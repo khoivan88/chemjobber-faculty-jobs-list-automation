@@ -124,22 +124,45 @@ class ChempostingcanadaSpider(XMLFeedSpider):
         if not is_posted_in_the_past_five_days:
             return
 
-        item['posted_date'] = posted_date_string
-
         title = node.xpath('.//x:title/text()').get()
         school, _, title = title.partition(':')
         school, title = map(str.strip, [school, title])
-        item['ads_title'] = title
-        item['canada'] = 'yes'
 
         details_url = node.xpath('.//x:link[@rel="alternate"]/@href').get()
         ads_source = f'=hyperlink("{details_url}","ChemPostingCanada")'
-        item['ads_source'] = ads_source
-
         recruiter = f'=hyperlink("{details_url}","{school}")'
-        item['school'] = recruiter
 
-        self.logger.info(f'{item=}')
+        ads_content = node.xpath('.//x:content/text()').get()
+        # self.logger.info(f'{ads_content=}')
+        ads_content_text_only = re.sub('<[^<]+?>', ' ', ads_content)
+        self.logger.info(f'{ads_content_text_only=}')
+
+        # Get specialization
+        specialization = set(word.lower()
+                             for word in re.findall(r'org\w*|anal\w*|inorg\w*|bio(?!chemical\b)\w+|physic\w*|polymer\w*', ads_content_text_only, re.IGNORECASE))
+        specialization = ', '.join(specialization)
+
+        # Get the ranking (using the job description)
+        rank = set(re.findall(r'Assistant\b|Associate\b|Full\s', ads_content_text_only))
+        rank_text = '/'.join(word.strip().lower()
+                             .replace('assistant', 'asst').replace('associate', 'assoc')
+                             for word in rank)
+
+        tenure_type = re.search(r'\S*tenure\S*', ads_content_text_only, re.IGNORECASE)
+        # print(f'{tenure_type=}')
+        comments1 = tenure_type[0] if tenure_type else None
+
+        # self.logger.info(f'{item=}')
+        item.update({
+            'posted_date': posted_date_string,
+            'ads_title': title,
+            'canada': 'yes',
+            'ads_source': ads_source,
+            'school': recruiter,
+            'specialization': specialization,
+            'rank': rank_text,
+            'comments1': comments1,
+        })
         return item
 
 
