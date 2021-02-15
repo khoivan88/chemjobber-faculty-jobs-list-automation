@@ -128,7 +128,7 @@ class ChronicalHigherEducationSpider(scrapy.Spider):
                 # print(f'{state=}')
                 continue
 
-            is_in_canada = bool(re.search(r'canada', country, re.IGNORECASE)) or None
+            is_in_canada = 'yes' if (re.search(r'canada', country, re.IGNORECASE)) else None
             # print(f'{location=}')
             recruiter = job.xpath('.//*[contains(@class, "lister__meta-item--recruiter")]//text()').get()
             # print(f'{recruiter=}')

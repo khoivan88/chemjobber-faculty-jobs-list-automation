@@ -114,7 +114,7 @@ class ChemicalEngineeringNewsSpider(scrapy.Spider):
             location = job.xpath('.//*[contains(@class, "lister__meta-item--location")]//text()').get()
             city, _, state = location.partition(',')
             city, state = map(str.strip, [city, state])
-            is_in_canada = bool(re.search(r'(CA)', state, re.IGNORECASE)) or None
+            is_in_canada = 'yes' if (re.search(r'\(CA\)', state)) else None
 
             # print(f'{location=}')
             recruiter = job.xpath('.//*[contains(@class, "lister__meta-item--recruiter")]//text()').get()

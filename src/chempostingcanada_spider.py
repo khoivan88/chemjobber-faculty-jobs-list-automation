@@ -130,7 +130,7 @@ class ChempostingcanadaSpider(XMLFeedSpider):
         school, _, title = title.partition(':')
         school, title = map(str.strip, [school, title])
         item['ads_title'] = title
-        item['canada'] = True
+        item['canada'] = 'yes'
 
         details_url = node.xpath('.//x:link[@rel="alternate"]/@href').get()
         ads_source = f'=hyperlink("{details_url}","ChemPostingCanada")'
