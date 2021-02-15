@@ -179,7 +179,7 @@ class ChemicalEngineeringNewsSpider(scrapy.Spider):
         # print(f'{job_description=}')
 
         # Get the ranking (using the job description)
-        rank = re.findall(r'assistant\b|associate\b|full\s', job_description, re.IGNORECASE)
+        rank = re.findall(r'Assistant\b|Associate\b|Full\s', job_description)
         rank_text = '/'.join(word.lower().replace('assistant', 'asst').replace('associate', 'assoc')
                              for word in rank)
         # print(f'{rank_text=}')
