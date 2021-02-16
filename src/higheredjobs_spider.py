@@ -167,6 +167,25 @@ class JobsHigheredjobsSpider(scrapy.Spider):
         application_url = online_application_url or response.url
         cb_kwargs['school'] = f'=hyperlink("{application_url}","{cb_kwargs["school"]}")'
         # print(f'{cb_kwargs=}')
+
+        job_description = ' '.join(word.strip()
+                            for word in (response.css('#jobDesc *::text').getall())
+                            if re.search(r'\S', word))
+        # print(f'{job_description=}')
+
+        # Get the ranking (using the job description)
+        rank = re.findall(r'Assistant\b|Associate\b|Full\s', job_description)
+        rank_text = '/'.join(word.lower().replace('assistant', 'asst').replace('associate', 'assoc')
+                             for word in rank)
+        # print(f'{rank_text=}')
+        cb_kwargs['rank'] = rank_text or cb_kwargs['rank']
+
+        tenure_type = re.search(r'\S*tenure\S*', job_description, re.IGNORECASE)
+        # print(f'{tenure_type=}')
+        comments1 = tenure_type[0] if tenure_type else None
+
+        cb_kwargs['comments1'] = comments1
+
         yield JobItem(cb_kwargs)
 
 
