@@ -4,5 +4,5 @@ google_auth_oauthlib==0.4.2
 gspread==3.6.0
 itemadapter==0.2.0
 protobuf==3.18.3
-scrapy==2.6.3
+scrapy==2.11.1
 Twisted==22.10.0
