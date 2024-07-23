@@ -15,14 +15,14 @@ jobs:
   update-job-list:
     # Scraping with Scrapy absolutely does NOT work on ubuntu
     # runs-on: ubuntu-20.04
-    runs-on: macos-11
+    runs-on: macos-15
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python 3.9
-      uses: actions/setup-python@v2
+    - uses: actions/checkout@v3
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
       with:
-        python-version: 3.9
+        python-version: 3.11
     - name: Cache pip Linux
       uses: actions/cache@v2
       if: startsWith(runner.os, 'Linux')
