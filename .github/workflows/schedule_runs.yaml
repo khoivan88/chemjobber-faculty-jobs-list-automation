@@ -15,7 +15,7 @@ jobs:
   update-job-list:
     # Scraping with Scrapy absolutely does NOT work on ubuntu
     # runs-on: ubuntu-20.04
-    runs-on: macos-15
+    runs-on: macos-latest
 
     steps:
     - uses: actions/checkout@v3
