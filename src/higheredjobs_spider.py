@@ -1,6 +1,6 @@
 # quote_spiders.py
 import re
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 import scrapy
@@ -98,26 +98,57 @@ class JobsHigheredjobsSpider(scrapy.Spider):
     allowed_domains = ['higheredjobs.com']
     start_urls = ['https://www.higheredjobs.com/faculty/search.cfm?JobCat=101&StartRow=-1&SortBy=1&NumJobs=25&filterby=&filterptype=1&filtercountry=38&filtercountry=226&CatType=']
     base_url = 'https://www.higheredjobs.com/faculty/'
+    api_url = 'https://www.higheredjobs.com/assets/api/searchResults.cfc'
+
+    def start_requests(self):
+        form_data = {'method':'getResults','JobCatCodeList':'101','sortBy':'1','AllCatsReturned':'true'}
+        headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36', }
+        return [scrapy.FormRequest(url=self.api_url, formdata=form_data, headers=headers, callback=self.parse)]
 
     def parse(self, response):
-        jobs = response.css('.row.record')
+        search_response = response.json()
+        jobs = search_response['data']['ARYSEARCHJOBS']
+        # print(search_response)
+    
+        # jobs = response.css('.row.record')
         is_posted_in_the_past_five_days = True
         for job in jobs:
-            title = job.xpath('.//a/text()').get().strip()
-            details_url = response.urljoin(job.xpath('.//a/@href').get())
-            ads_job_code = re.findall(r'(?<=JobCode=).*(?=&)', details_url)[0]
-            all_text = job.xpath('.//text()').extract()
-            # print(f'{all_text=}')
-            # print([word.strip() for word in all_text if re.search(r'\S', word)])
-            [_, school, location, department, *posted_date] = [word.strip()
-                                                               for word in all_text
-                                                               if re.search(r'\S', word)]
-            posted_date = datetime.strptime(re.findall(r'\d{2}/\d{2}/\d{2}', posted_date[0])[0],
-                                            '%m/%d/%y')
-            is_posted_in_the_past_five_days = ((datetime.now() - posted_date).days <= 5)
+            '''Example:
+            {'InstType': 1, 'isAAEmail': False, 'RemoteType': 1, 'isMilitaryUpgrade': True, 
+            'Department': '', 'Priority': False, 'InstCity': 'Tucson', 'isPoolPosition': False, 
+            'ProfileID': 0, 'InstName': 'The University of Arizona', 'Salary': '', 'PositionType': 1, 
+            'JobCatCodes': [170, 101], 'JobCode': 178861321, 'JobCatDesc': 'Geology, Earth Sciences, and Oceanography', 
+            'AccountID': 607, 'DatePosted': '2024-07-22T23:01:26.547Z', 'InstCountryCode': 226, 
+            'JobTitle': 'Researcher/Scientist III, Mining and Geological Engineering', 'InstStateCode': 'AZ'}
 
-            city, _, state = location.partition(',')
-            city, state = map(str.strip, [city, state])
+            '''
+            posted_date = datetime.fromisoformat(job.get('DatePosted'))
+            is_posted_in_the_past_five_days = ((datetime.now(tz=timezone.utc) - posted_date).days <= 5)
+
+            # title = job.xpath('.//a/text()').get().strip()
+            # details_url = response.urljoin(job.xpath('.//a/@href').get())
+            # ads_job_code = re.findall(r'(?<=JobCode=).*(?=&)', details_url)[0]
+            
+            title = job.get('JobTitle')
+            ads_job_code = job.get("JobCode")
+            details_url = f'https://www.higheredjobs.com/faculty/details.cfm?JobCode={ads_job_code}'
+            
+            # all_text = job.xpath('.//text()').extract()
+            # # print(f'{all_text=}')
+            # # print([word.strip() for word in all_text if re.search(r'\S', word)])
+            # [_, school, location, department, *posted_date] = [word.strip()
+            #                                                    for word in all_text
+            #                                                    if re.search(r'\S', word)]
+            # posted_date = datetime.strptime(re.findall(r'\d{2}/\d{2}/\d{2}', posted_date[0])[0],
+            #                                 '%m/%d/%y')
+            # is_posted_in_the_past_five_days = ((datetime.now() - posted_date).days <= 5)
+            # city, _, state = location.partition(',')
+            # city, state = map(str.strip, [city, state])
+
+            school = job.get('InstName')
+            department = job.get('Department')
+            city = job.get('InstCity')
+            state = job.get('InstStateCode')
             ads_source = f'=hyperlink("{details_url}","HigherEdJobs")'
 
             # Get the ranking
@@ -148,20 +179,21 @@ class JobsHigheredjobsSpider(scrapy.Spider):
                                      cb_kwargs=cb_kwargs,
                                      callback=self.parse_ads)
 
-        # Find next page url if exists:
-        next_page_partial_url = response.xpath('.//a[.//img[not(contains(@class, "disabled")) and contains(@src, "right.gif")]]/@href').get()
-        # print(f'{next_page_partial_url=}')
+        # # Find next page url if exists:
+        # next_page_partial_url = response.xpath('.//a[.//img[not(contains(@class, "disabled")) and contains(@src, "right.gif")]]/@href').get()
+        # # print(f'{next_page_partial_url=}')
 
-        if next_page_partial_url and is_posted_in_the_past_five_days:
-            next_page_url = response.urljoin(next_page_partial_url)
-            # print(f'{next_page_url=}')
-            yield scrapy.Request(url=next_page_url, callback=self.parse)
+        # if next_page_partial_url and is_posted_in_the_past_five_days:
+        #     next_page_url = response.urljoin(next_page_partial_url)
+        #     # print(f'{next_page_url=}')
+        #     yield scrapy.Request(url=next_page_url, callback=self.parse)
 
     def parse_ads(self, response, **cb_kwargs):
-        online_application_title_field = response.xpath(
-            './/*[@id="jobApplyInfo"]//*[contains(@class, "field-label")][contains(normalize-space(text()), "Online App. Form")]'
-        )
-        online_application_url = online_application_title_field.xpath('./following-sibling::div[1]/a/@data-orig-href').get()
+        # online_application_title_field = response.xpath(
+        #     './/*[@id="jobApplyInfo"]//*[contains(@class, "field-label")][contains(normalize-space(text()), "Online App. Form")]'
+        # )
+        # online_application_url = online_application_title_field.xpath('./following-sibling::div[1]/a/@data-orig-href').get()
+        online_application_url = response.css('#js-applyurl').attrib.get('data-orig-href')
 
         # Update the school field to embed the link to the online app if exists (following Chemjobber List format)
         application_url = online_application_url or response.url
@@ -171,7 +203,7 @@ class JobsHigheredjobsSpider(scrapy.Spider):
         job_description = ' '.join(word.strip()
                             for word in (response.css('#jobDesc *::text').getall())
                             if re.search(r'\S', word))
-        # print(f'{job_description=}')
+        print(f'{job_description=}')
 
         # Get the ranking (using the job description)
         rank = set(re.findall(r'Assistant\b|Associate\b|Full\s', job_description))
@@ -194,7 +226,7 @@ if __name__ == '__main__':
     THIS_SPIDER_RESULT_FILE.unlink(missing_ok=True)
 
     settings = {
-        'USER_AGENT': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36',
+        'USER_AGENT': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
         # 'USER_AGENT': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.87 Safari/537.36',
         # 'HTTPCACHE_ENABLED': True,
         # 'DEFAULT_REQUEST_HEADERS': {
