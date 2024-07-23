@@ -203,7 +203,7 @@ class JobsHigheredjobsSpider(scrapy.Spider):
         job_description = ' '.join(word.strip()
                             for word in (response.css('#jobDesc *::text').getall())
                             if re.search(r'\S', word))
-        print(f'{job_description=}')
+        # print(f'{job_description=}')
 
         # Get the ranking (using the job description)
         rank = set(re.findall(r'Assistant\b|Associate\b|Full\s', job_description))
