@@ -1,5 +1,6 @@
 import re
-from datetime import datetime
+import json
+from datetime import datetime, timezone
 from pathlib import Path, PurePath
 
 import scrapy
@@ -161,19 +162,44 @@ class ChemicalEngineeringNewsSpider(scrapy.Spider):
             yield scrapy.Request(url=next_page_url, callback=self.parse)
 
     def parse_ads(self, response, **cb_kwargs):
+        data_layer_string = response.xpath('//script[contains(., "DataLayer")]/text()').get()
+        data_layer = re.search(r'.*(\{.+\})', data_layer_string, re.MULTILINE|re.DOTALL)
+        # print(f'{data_layer=}')
+        if data_layer:
+            data = json.loads(data_layer.group(1))
+            # print(f'{data=}')
+
+        detail_data_layer_string = response.css('script[type="application/ld+json"]::text').get()
+        if detail_data_layer_string:
+            detail_data = json.loads(detail_data_layer_string)
+            # print(f'{detail_data=}')
+            
         # Get the text
-        posted_date = ''.join(response.css('.job-detail-description__posted-date > *:last-child *::text').getall()).strip()
+        # posted_date = ''.join(response.css('.job-detail-description__posted-date > *:last-child *::text').getall()).strip()
+        posted_date = response.css('meta[property="og:article:published_time"]').attrib.get('content')
         #  Convert to datetime format mm/dd/yyyy
-        posted_date = datetime.strptime(posted_date, '%b %d, %Y')
-        posted_date_string = posted_date.strftime('%m/%d/%Y')
+        # posted_date = datetime.strptime(posted_date, '%b %d, %Y')
+        posted_date_obj = datetime.fromisoformat(posted_date)
+        posted_date_string = posted_date_obj.strftime('%m/%d/%Y')
 
-        priority_date = ''.join(response.css('.job-detail-description__end-date > *:last-child *::text').getall()).strip()
-        priority_date = datetime.strptime(priority_date, '%b %d, %Y').strftime('%m/%d/%Y')
+        # priority_date = ''.join(response.css('.job-detail-description__end-date > *:last-child *::text').getall()).strip()
+        # priority_date = datetime.strptime(priority_date, '%b %d, %Y').strftime('%m/%d/%Y')
+        priority_date = response.css('meta[property="og:article:expiration_time"]').attrib.get('content')
+        priority_date = datetime.fromisoformat(priority_date).strftime('%m/%d/%Y')
 
-        specialization_text_list = response.css('.job-detail-description__category-Fieldofspecialization > *:last-child *::text').getall()
-        specialization = re.sub(r'\s{2,}', '', ''.join(specialization_text_list))
+        if data_layer:
+            specialization = data.get('Field of specialization-AllTerms')
+        else: 
+            specialization_text_list = response.css('.job-detail-description__category-Fieldofspecialization > *:last-child *::text').getall()
+            specialization = re.sub(r'\s{2,}', '', ''.join(specialization_text_list))
 
-        job_description = ' '.join(word.strip()
+        # job_description = ' '.join(word.strip()
+        #                            for word in (response.css('.job-description *::text').getall())
+        #                            if re.search(r'\S', word))
+        if detail_data_layer_string:
+            job_description = detail_data.get('description')
+        if not job_description:
+            job_description = ' '.join(word.strip()
                                    for word in (response.css('.job-description *::text').getall())
                                    if re.search(r'\S', word))
         # print(f'{job_description=}')
@@ -195,11 +221,12 @@ class ChemicalEngineeringNewsSpider(scrapy.Spider):
                           'comments1': comments1})
         # yield JobItem(cb_kwargs)
 
-        is_posted_in_the_past_five_days = (datetime.now() - posted_date).days <= 5
+        is_posted_in_the_past_five_days = (datetime.now(tz=timezone.utc) - posted_date_obj).days <= 5
         # Update the school field to embed the link to the online app if exists (following Chemjobber List format)
         # scrapy `.attrib` is also available on SelectorList directly; it returns attributes for the first matching element:returns attributes for the first matching element:
         # https://docs.scrapy.org/en/latest/topics/selectors.html#using-selectors
-        apply_button_partial_url = response.css('a.button--apply').attrib['href']
+        # apply_button_partial_url = response.css('a.button--apply').attrib['href']
+        apply_button_partial_url = response.css('a[data-hook="apply-button"]').attrib['href']
         if apply_button_partial_url and is_posted_in_the_past_five_days:
             apply_button_url = response.urljoin(apply_button_partial_url) + '&Action=Cancel'
             # print(f'{apply_button_url=}')
